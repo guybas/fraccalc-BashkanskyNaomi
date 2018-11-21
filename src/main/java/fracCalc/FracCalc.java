@@ -1,32 +1,33 @@
-/**
+/*
+ *
  * @author Mr. Rasmussen
  */
 
 package fracCalc;
-
+import java.util.*;
+//Naomi Bashkansky P.2
+//Checkpoint 1 prints the second number
+	//Pre: number, space, operator, space, number (1_1/2 - 1/4)
+	//Post: number (1/4)
 public class FracCalc {
 
-    public static void main(String[] args)
-    {
-        // TODO: Read the input from the user and call produceAnswer with an equation
-
+    public static void main(String[] args) {
+        // 
+    	Scanner console = new Scanner(System.in);
+    	System.out.print("Input: ");
+    	String input = console.nextLine();
+    	String answer = produceAnswer(input);
+    	System.out.println(answer);
+    	console.close();
     }
-
-    // ** IMPORTANT ** DO NOT DELETE THIS FUNCTION.  This function will be used to test your code
-    // This function takes a String 'input' and produces the result
-    //
-    // input is a fraction string that needs to be evaluated.  For your program, this will be the user input.
-    //      e.g. input ==> "1/2 + 3/4"
-    //
-    // The function should return the result of the fraction after it has been calculated
-    //      e.g. return ==> "1_1/4"
-    public static String produceAnswer(String input)
-    {
-        // TODO: Implement this function to produce the solution to the input
-
-        return "";
+    
+    public static String produceAnswer(String input) {
+        // Seperators the first number, the operator, and the second number
+    	int firstIndexSpace = input.indexOf(" ");
+    	String first = input.substring(0, firstIndexSpace);
+    	input = input.substring(firstIndexSpace + 1);
+    	String operator = input.substring(0, 1);
+    	String second = input.substring(2);
+        return second;
     }
-
-    // TODO: Fill in the space below with any helper methods that you think you will need
-
 }
