@@ -6,13 +6,15 @@
 package fracCalc;
 import java.util.*;
 //Naomi Bashkansky P.2
-//Checkpoint 3 accepts two numbers and an operator and prints out the answer of the
-//expression, though not necessarily as a reduced, mixed fraction
+//The program accepts numbers and operators and prints out the reduced,
+//never improper answer of the expression. Keeps on accepting lines of input until
+//the user enters "quit"
 	/*Pre: User types in a number made of either an int; an int, a /, and an int;
-		or an int, an _, an int, a slash, and an int. Then, a space, an operator, another
-		space, another number, and enters. User keeps typing such a line until "quit"
-		is entered. (e.g. -1_1/2 + 1/4)
-	  Post: Prints the result of the expression
+		or an int, an _, an int, a slash, and an int. Then, as many times as the user wants: 
+		a space, an operator, another space, another number. When done typing expression,
+		user enters. (e.g. -1_1/2 + 1/4 * 1/2). User keeps entering such lines of input
+		until the user enters in "quit".
+	  Post: Prints the result of the expression (e.g. -5/8) calculated left to right
 	*/
 public class FracCalc {
 
@@ -34,13 +36,24 @@ public class FracCalc {
     }
     
     public static String produceAnswer(String input) {
-        // Separates the first number, the operator, and the second number,
-    	//and returns the result of the expression (though not necessarily simplified)
-    	int firstIndexSpace = input.indexOf(" ");
+        // Separates the numbers and the operators,
+    	//and returns the result of the expression reduced and never improper.
+    	//Returns error if divide by 0 or if input is in an invalid format
+    	int firstIndexSpace = input.indexOf(' ');
     	String first = input.substring(0, firstIndexSpace);
     	input = input.substring(firstIndexSpace + 1);
     	char operator = input.charAt(0);
-    	String second = input.substring(2);
+    	int secondIndexSpace = input.indexOf(' ');
+    	input = input.substring(secondIndexSpace + 1);
+    	String second = input.substring(0);
+    	
+    	if (!(valid(first, second, operator))) {
+    		if (input.indexOf(' ') == -1) {
+    			return "ERROR: Input is in an invalid format.";
+    		} else {
+    			return multipleOps(input, first, operator);
+    		}
+    	}
     	
     	boolean underscore = false;
     	boolean slash = false;
@@ -102,6 +115,10 @@ public class FracCalc {
     		denominator2 = 1;
     	}
     	
+    	if (denominator1 == 0 || denominator2 == 0 || operator == '/' && numerator2 == 0) {
+    		return "ERROR: Cannot divide by zero.";
+    	}
+    	
     	int answerNumerator;
     	int answerDenominator = denominator1 * denominator2;
     	if (operator == '+') {
@@ -114,7 +131,79 @@ public class FracCalc {
     		answerNumerator = numerator1 * denominator2;
     		answerDenominator = denominator1 * numerator2;
     	}
-        
-    	return "" + answerNumerator + "/" + answerDenominator;
+    	
+    	if (answerDenominator == 1 || answerNumerator % answerDenominator == 0) {
+    		return "" + (answerNumerator / answerDenominator);
+    	} 
+    	int multiplier = 1;
+    	if (answerNumerator < 0) {
+    		multiplier *= -1;
+    		answerNumerator *= -1;
+    	}
+    	if (answerDenominator < 0) {
+    		multiplier *= -1;
+    		answerDenominator *= -1;
+    	}
+    	for (int i = 2; i <= Math.min(answerNumerator, answerDenominator); i++) {
+    		while (answerNumerator % i == 0 && answerDenominator % i == 0) {
+    			answerNumerator /= i;
+    			answerDenominator /= i;
+    		}
+    	}
+    	if (answerNumerator < answerDenominator) {
+    		return "" + (answerNumerator * multiplier) + '/' + answerDenominator;
+    	}
+    	int whole = 0;
+    	while (answerNumerator > answerDenominator) {
+    		answerNumerator -= answerDenominator;
+    		whole += 1;
+    	}
+    	return "" + (whole * multiplier) + '_' + answerNumerator + '/' + answerDenominator;
+    }
+    
+    public static boolean valid(String first, String second, char operator) {
+    	//Checks for invalid format
+    	for (int i = 0; i < first.length(); i++) {
+    		char c = first.charAt(i);
+    		if (!(c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || 
+    				c == '6' || c == '7' || c == '8' || c == '9' || c == '/' || c == '_' || 
+    				c == '-')) {
+    			return false;
+    		}
+    	}
+    	for (int i = 0; i < second.length(); i++) {
+    		char c = second.charAt(i);
+    		if (!(c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || 
+    				c == '6' || c == '7' || c == '8' || c == '9' || c == '/' || c == '_' || 
+    				c == '-')) {
+    			return false;
+    		}
+    	}    	
+    	if (!(operator == '+' || operator == '-' || operator == '*' || operator == '/')) {
+    		return false;
+    	}
+    	return true;
+    }
+    
+    public static String multipleOps(String input, String first, char operator) {
+    	//Handles arbitrarily many values and operators, calculated left to right
+    	int nextIndexSpace = input.indexOf(' ');
+	    String nextNum = input.substring(0, nextIndexSpace);
+	    String newNum = first;
+	    newNum = produceAnswer(newNum + " " + operator + " " + nextNum);
+		while (input.indexOf(' ') != -1) {
+			nextIndexSpace = input.indexOf(' ');
+			input = input.substring(nextIndexSpace + 1);
+			operator = input.charAt(0);
+			input = input.substring(2);
+			nextIndexSpace = input.indexOf(' ');
+			if (nextIndexSpace != -1) {
+				nextNum = input.substring(0, nextIndexSpace);
+			} else {
+				nextNum = input.substring(0);
+			}
+			newNum = produceAnswer(newNum + " " + operator + " " + nextNum);
+		}
+		return newNum;
     }
 }
